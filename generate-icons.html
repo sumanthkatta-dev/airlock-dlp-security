@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mute Icon Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 600px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .preview {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .icon-preview {
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .instructions {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Mute Icon Generator</h1>
+        <p class="subtitle">AI Security Guardrail Chrome Extension</p>
+        
+        <div class="preview">
+            <div class="icon-preview">
+                <canvas id="icon16" width="16" height="16"></canvas>
+                <p>16x16</p>
+                <button onclick="downloadIcon('icon16', 'icon16.png')">Download</button>
+            </div>
+            <div class="icon-preview">
+                <canvas id="icon48" width="48" height="48"></canvas>
+                <p>48x48</p>
+                <button onclick="downloadIcon('icon48', 'icon48.png')">Download</button>
+            </div>
+            <div class="icon-preview">
+                <canvas id="icon128" width="128" height="128"></canvas>
+                <p>128x128</p>
+                <button onclick="downloadIcon('icon128', 'icon128.png')">Download</button>
+            </div>
+        </div>
+
+        <button onclick="downloadAllIcons()" style="font-size: 18px; padding: 20px 40px;">
+            📥 Download All Icons
+        </button>
+
+        <div class="instructions">
+            <h3>📋 Instructions:</h3>
+            <ol>
+                <li>Click <strong>"Download All Icons"</strong> or download each icon individually</li>
+                <li>Save all three PNG files to the <code>icons/</code> folder in your mute extension directory</li>
+                <li>Reload the extension in Chrome (<code>chrome://extensions</code>)</li>
+                <li>You should see the shield icon appear in your extensions toolbar!</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Generate icons on page load
+        window.onload = function() {
+            generateIcon('icon16', 16);
+            generateIcon('icon48', 48);
+            generateIcon('icon128', 128);
+        };
+
+        function generateIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Background gradient (blue to purple security theme)
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw shield shape
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.beginPath();
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const shieldWidth = size * 0.6;
+            const shieldHeight = size * 0.7;
+            
+            ctx.moveTo(centerX, centerY - shieldHeight / 2);
+            ctx.lineTo(centerX + shieldWidth / 2, centerY - shieldHeight / 3);
+            ctx.lineTo(centerX + shieldWidth / 2, centerY + shieldHeight / 4);
+            ctx.lineTo(centerX, centerY + shieldHeight / 2);
+            ctx.lineTo(centerX - shieldWidth / 2, centerY + shieldHeight / 4);
+            ctx.lineTo(centerX - shieldWidth / 2, centerY - shieldHeight / 3);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw "M" letter
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('M', centerX, centerY + size * 0.05);
+            
+            // Add small lock icon (for 48 and 128 size)
+            if (size >= 48) {
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                const lockSize = size * 0.15;
+                const lockX = centerX + size * 0.25;
+                const lockY = centerY - size * 0.25;
+                ctx.arc(lockX, lockY - lockSize * 0.3, lockSize * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Lock body
+                ctx.fillStyle = '#ff6b6b';
+                ctx.fillRect(lockX - lockSize * 0.5, lockY, lockSize, lockSize * 0.8);
+                
+                // Keyhole
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(lockX, lockY + lockSize * 0.3, lockSize * 0.15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadAllIcons() {
+            setTimeout(() => downloadIcon('icon16', 'icon16.png'), 100);
+            setTimeout(() => downloadIcon('icon48', 'icon48.png'), 300);
+            setTimeout(() => downloadIcon('icon128', 'icon128.png'), 500);
+            
+            // Show success message
+            setTimeout(() => {
+                alert('✅ All icons downloaded!\n\nPlease move them to the icons/ folder in your mute extension directory.');
+            }, 700);
+        }
+    </script>
+</body>
+</html>
