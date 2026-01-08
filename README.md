@@ -1,4 +1,3 @@
-```markdown
 # Airlock 🛡️🔒
 
 ![Category](https://img.shields.io/badge/Category-Enterprise_Security-red?style=for-the-badge)
