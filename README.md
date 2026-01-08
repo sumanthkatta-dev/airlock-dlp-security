@@ -93,9 +93,3 @@ airlock/
 
 ```
 
-# 3. Push to GitHub
-git push
-
-```
-
-**Perfect.** You now have a professional security portfolio piece with visual proof! 🟢
