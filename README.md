@@ -1,94 +1,55 @@
-# Airlock 🛡️🔒
+# Airlock
 
-![Category](https://img.shields.io/badge/Category-Enterprise_Security-red?style=for-the-badge)
-![Tech](https://img.shields.io/badge/Stack-Chrome_Manifest_V3-blue?style=for-the-badge)
-![Status](https://img.shields.io/badge/Protection-Active-success?style=for-the-badge)
+A Chrome extension that stops secrets and personal data from being pasted into public AI chat tools. It checks the clipboard locally and blocks the paste before anything reaches ChatGPT, Claude or Gemini.
 
-> **Data Loss Prevention (DLP) Sentry:** A browser-based security middleware that intercepts and blocks sensitive data (API Keys, PII) before it enters public AI models.
+## Screenshots
 
-## 🖼️ Security in Action
-### 1. Blocking IP Leakage
-![IP address blocked](./ip-preview.png)
+| Blocking an IP address | Blocking an API key |
+|---|---|
+| ![IP address blocked](./ip-preview.png) | ![API key blocked](./api-preview.png) |
 
-### 2. Blocking API Key Leakage
-![API key blocked](./api-preview.png)
-*(Snapshot: Airlock detecting sensitive patterns and blocking the paste action on ChatGPT)*
+## Why I built it
 
-## 🚨 The Problem: "Shadow AI"
-Employees frequently paste sensitive company data into public LLMs (ChatGPT, Claude, Gemini) for quick debugging. This leads to:
-* **Data Leaks:** Private keys and customer PII entering public training data.
-* **Compliance Violations:** Breaches of GDPR, SOC2, and internal security protocols.
+People paste stack traces, config files and logs into AI chats to debug faster, and keys and personal data go along with them. Company policies say "don't", but nothing actually stops it in the moment. Airlock is a guardrail at the exact point where the leak happens.
 
-## 🛡️ The Solution
-Airlock runs locally as a "Security Sentry" between your clipboard and the browser DOM.
-1.  **Intercept:** Listens for `paste` events specifically on AI domains.
-2.  **Analyze:** Instantly runs a local Regex engine to scan for threat patterns.
-3.  **Block:** If a threat (e.g., `sk-live-...`) is detected, the event is hard-blocked at the DOM level.
+## What it detects
 
-## ⚙️ Technical Implementation
-* **Manifest V3:** Built on the latest secure Chrome Extension architecture using Service Workers.
-* **Regex Engine:** Zero-latency client-side pattern matching for:
-    * AWS Access Keys (`AKIA...`)
-    * Private RSA Keys
-    * IPv4/IPv6 Addresses
-    * Social Security / Aadhar formats
-* **Privacy First:** Analysis happens 100% locally. No data ever leaves the browser.
+AWS access and secret keys · private keys (RSA, EC, OpenSSH) · JWTs · generic API keys and `password=`/`api_key=` assignments · database connection strings · email addresses · IPv4 addresses · US Social Security numbers · credit card numbers
 
----
+All patterns live in [`patterns.js`](patterns.js).
 
-## 🧪 Test It Yourself
-Want to see the blocking in action? Copy any of these "Dummy Secrets" below and try to paste them into ChatGPT or Claude while the extension is running.
+## How it works
 
-**1. Fake AWS Access Key (Matches `AKIA...` pattern)**
+1. A content script (`content.js`) is injected at `document_start` on chatgpt.com, claude.ai and gemini.google.com.
+2. It listens for `paste` events and runs the clipboard text through the regex patterns.
+3. On a match it cancels the paste and shows an alert naming what was detected.
+4. The background service worker (`background.js`) handles browser notifications and a right-click menu.
+
+Everything runs locally. The extension makes no network requests.
+
+## Try it
+
+1. Clone the repo, open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick the folder.
+2. Open ChatGPT, Claude or Gemini and try pasting one of these fake values:
+
 ```text
-AKIAIMNOTREALKEYEXAMPLE
-
+AKIAIOSFODNN7EXAMPLE
 ```
-
-**2. Fake Private RSA Key (Matches `-----BEGIN...` pattern)**
-
 ```text
 -----BEGIN RSA PRIVATE KEY-----
-MIIEpQIBAAKCAQEA3Tz2mr7SZiAMfQyuvBjM9Oi..
------END RSA PRIVATE KEY-----
-
 ```
-
-**3. Internal IP Address (Matches IPv4 pattern)**
-
 ```text
 192.168.0.154
-
 ```
 
-> **Expected Result:** The paste action will be blocked, and you will see the Airlock Security Alert banner.
+The paste should be blocked and an alert should name what was caught.
 
----
+## Tech stack
 
-## 📂 File Structure
+JavaScript · Chrome Extensions Manifest V3 (content scripts, service worker, contextMenus, notifications)
 
-```text
-airlock/
-├── manifest.json          # Extension configuration (Manifest V3)
-├── background.js          # Background service worker
-├── content.js             # Content script for paste monitoring
-├── icons/                 # Extension icons
-│   ├── icon16.png
-│   ├── icon48.png
-│   └── icon128.png
-└── README.md              # This file
+## Roadmap
 
-```
-
-## 🛠️ Development Phases
-
-* ✅ **Phase 1:** Project Setup & Manifest
-* ✅ **Phase 2:** Security Patterns (Regex Library)
-* ✅ **Phase 3:** Paste Event Listener & Blocker
-* ⏳ **Phase 4:** Advanced Features & Context Menu
-
----
-
-*Developed by Sumanth Katta | Jan 2026*
-
-
+- Let users allow-list specific values
+- Mask the sensitive part and paste the rest, instead of blocking the whole paste
+- Configurable list of protected sites
